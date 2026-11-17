@@ -1,0 +1,17 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 640 480" role="img" aria-labelledby="title desc">
+  <title id="title">Statement mirror</title>
+  <desc id="desc">A sculptural violet framed mirror against a dark, atmospheric wall.</desc>
+  <defs>
+    <linearGradient id="bg" x2="0" y2="1"><stop stop-color="#171322"/><stop offset="1" stop-color="#08080D"/></linearGradient>
+    <linearGradient id="mirror" x2="1" y2="1"><stop stop-color="#b9dcff"/><stop offset=".48" stop-color="#756d97"/><stop offset="1" stop-color="#1c2037"/></linearGradient>
+    <linearGradient id="frame" x2="1" y2="1"><stop stop-color="#d6cbff"/><stop offset=".5" stop-color="#8976ff"/><stop offset="1" stop-color="#4332a2"/></linearGradient>
+    <filter id="glow" x="-50%" y="-50%" width="200%" height="200%"><feGaussianBlur stdDeviation="14"/></filter>
+  </defs>
+  <rect width="640" height="480" fill="url(#bg)"/>
+  <ellipse cx="320" cy="225" rx="124" ry="166" fill="#8976ff" opacity=".22" filter="url(#glow)"/>
+  <path d="M320 55c-83 0-137 67-137 166s54 166 137 166 137-67 137-166S403 55 320 55Z" fill="url(#frame)"/>
+  <path d="M320 73c-71 0-117 59-117 148s46 148 117 148 117-59 117-148S391 73 320 73Z" fill="url(#mirror)"/>
+  <path d="M231 182c13-53 42-83 82-94M225 224c1-12 2-23 4-34" fill="none" stroke="#fff" stroke-width="8" stroke-linecap="round" opacity=".35"/>
+  <path d="M267 388h106l27 44H240z" fill="#282238"/><path d="M256 432h128" stroke="#d5f06e" stroke-width="3" opacity=".7"/>
+  <circle cx="320" cy="55" r="5" fill="#d5f06e"/>
+</svg>
