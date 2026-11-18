@@ -1,3 +1,0 @@
-User-agent: *
-Allow: /
-Sitemap: https://vizora.online/sitemap.xml
