@@ -506,14 +506,10 @@
       syncToggle();
     };
     if (!motion.matches) {
-      const loadWhenIdle = () => {
+      const scheduleLoad = window.requestIdleCallback || ((callback) => window.setTimeout(callback, 1200));
+      scheduleLoad(() => {
         if (!motion.matches) loadSource();
-      };
-      if (typeof window.requestIdleCallback === "function") {
-        window.requestIdleCallback(loadWhenIdle, { timeout: 2500 });
-      } else {
-        window.setTimeout(loadWhenIdle, 1200);
-      }
+      }, { timeout: 2500 });
     }
     applyMotionPreference();
     motion.addEventListener?.("change", applyMotionPreference);
