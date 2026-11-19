@@ -409,6 +409,7 @@
     if (!video) return;
     const toggle = document.querySelector("#hero-video-toggle");
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
+    const mobileViewport = window.matchMedia("(max-width: 768px)");
     const syncToggle = () => {
       if (!toggle) return;
       const playing = !video.paused && !video.ended;
@@ -421,12 +422,23 @@
       if (video.paused) video.play().catch(() => {});
       else video.pause();
     });
+    const selectVideoSource = () => {
+      const source = mobileViewport.matches ? video.dataset.mobileSrc : video.dataset.desktopSrc;
+      if (!source || video.dataset.activeSource === source) return;
+      video.pause();
+      video.dataset.activeSource = source;
+      video.src = source;
+      video.load();
+      if (!motion.matches) video.play().catch(() => {});
+    };
     const applyMotionPreference = () => {
       if (motion.matches) video.pause();
       else video.play().catch(() => {});
       syncToggle();
     };
-    applyMotionPreference();
+    selectVideoSource();
+    video.addEventListener("loadedmetadata", applyMotionPreference, { once: true });
+    mobileViewport.addEventListener?.("change", selectVideoSource);
     motion.addEventListener?.("change", applyMotionPreference);
   }
   function setupYear() { document.querySelectorAll("[data-year]").forEach((element) => { element.textContent = new Date().getFullYear(); }); }
