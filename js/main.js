@@ -407,21 +407,8 @@
   function setupHeroVideo() {
     const video = document.querySelector("#hero-video");
     if (!video) return;
-    const toggle = document.querySelector("#hero-video-toggle");
     const motion = window.matchMedia("(prefers-reduced-motion: reduce)");
     const mobileViewport = window.matchMedia("(max-width: 768px)");
-    const syncToggle = () => {
-      if (!toggle) return;
-      const playing = !video.paused && !video.ended;
-      toggle.setAttribute("aria-pressed", String(playing));
-      toggle.setAttribute("aria-label", playing ? "Pause hero video" : "Play hero video");
-    };
-    video.addEventListener("play", syncToggle);
-    video.addEventListener("pause", syncToggle);
-    toggle?.addEventListener("click", () => {
-      if (video.paused) video.play().catch(() => {});
-      else video.pause();
-    });
     const selectVideoSource = () => {
       const source = mobileViewport.matches ? video.dataset.mobileSrc : video.dataset.desktopSrc;
       if (!source || video.dataset.activeSource === source) return;
@@ -434,7 +421,6 @@
     const applyMotionPreference = () => {
       if (motion.matches) video.pause();
       else video.play().catch(() => {});
-      syncToggle();
     };
     selectVideoSource();
     video.addEventListener("loadedmetadata", applyMotionPreference, { once: true });

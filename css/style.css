@@ -410,12 +410,6 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
   .home-page .hero-proof .proof-mark{width:36px;height:36px;flex:0 0 36px}
   .home-page .hero-proof p{color:rgba(255,255,255,.82);font-size:10px}
   .home-page .video-label{display:none}
-  .home-page .hero-video-toggle{display:grid;position:absolute;z-index:3;right:16px;bottom:16px;width:40px;height:40px;place-items:center;padding:0;border:1px solid rgba(255,255,255,.78);border-radius:50%;background:rgba(10,8,24,.48);color:#fff;cursor:pointer}
-  .home-page .hero-video-toggle svg{width:18px;height:18px;fill:none;stroke:currentColor;stroke-width:2;stroke-linecap:round;stroke-linejoin:round}
-  .home-page .hero-video-toggle .video-icon-play{display:none;fill:currentColor;stroke:none}
-  .home-page .hero-video-toggle[aria-pressed="false"] .video-icon-pause{display:none}
-  .home-page .hero-video-toggle[aria-pressed="false"] .video-icon-play{display:block}
-  .home-page .hero-video-toggle:focus-visible{outline:2px solid #C6F253;outline-offset:3px}
 
   .home-page .instagram-float,.home-page .whatsapp-float{right:12px;z-index:18;width:38px;min-width:38px;height:38px;min-height:38px;padding:0;justify-content:center;border-radius:50%}
   .home-page .instagram-float{bottom:calc(60px + env(safe-area-inset-bottom))}
@@ -433,5 +427,4 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 @media(max-width:768px) and (prefers-reduced-motion:reduce){
   .home-page .hero-video{visibility:hidden}
   .home-page .hero-art.hero-video-frame{background:#08080D url("../images/hero-video-poster.jpeg") center/cover no-repeat}
-  .home-page .hero-video-toggle{display:none}
 }
