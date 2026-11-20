@@ -362,15 +362,11 @@
     const nameField = form.elements.name;
     const addressField = form.elements.address;
     const status = document.querySelector("#checkout-message");
-    const discountLine = document.querySelector("#coupon-discount-line");
-    const discountValue = document.querySelector("#coupon-discount");
     const subtotalValue = document.querySelector("#cart-subtotal");
     const totalValue = document.querySelector("#cart-total");
     const stepPanes = [...form.querySelectorAll("[data-checkout-pane]")];
     const stepIndicators = [...document.querySelectorAll("[data-step-indicator]")];
     let currentStep = "login";
-    let couponEligible = false;
-    let couponReason = "";
     form.noValidate = true;
 
     function setStatus(message, isError = false) {
@@ -401,28 +397,11 @@
         else indicator.removeAttribute("aria-current");
       });
     }
-    async function continueToAddress() {
+    function continueToAddress() {
       if (!phoneField.reportValidity()) return;
-      const button = document.querySelector("#continue-to-address");
-      button.disabled = true;
-      setStatus("Checking this number for the first-order offer…");
-      try {
-        const offer = await postJson("/api/coupon/status", { phone: phoneField.value });
-        couponEligible = offer.eligible;
-        couponReason = offer.reason;
-        refresh();
-        setStatus(couponEligible
-          ? "WELCOME777 is available: 7% off your first order."
-          : couponReason === "order_pending"
-            ? "A checkout is already pending for this number."
-            : "The welcome offer is for a first completed order.");
-        setStep("address");
-        nameField.focus();
-      } catch (error) {
-        setStatus(error.message, true);
-      } finally {
-        button.disabled = false;
-      }
+      setStatus("");
+      setStep("address");
+      nameField.focus();
     }
     function continueToPayment() {
       if (!nameField.reportValidity()) return;
@@ -434,11 +413,8 @@
       const cart = getCart();
       const validItems = cart.map((item, index) => ({ ...item, index, product: productById(item.id) })).filter((item) => item.product);
       const subtotal = validItems.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
-      const discount = couponEligible ? Math.round(subtotal * 0.07) : 0;
       subtotalValue.textContent = currency(subtotal);
-      discountValue.textContent = `−${currency(discount)}`;
-      discountLine.hidden = !couponEligible || subtotal === 0;
-      totalValue.textContent = currency(Math.max(0, subtotal - discount));
+      totalValue.textContent = currency(subtotal);
       empty.hidden = validItems.length > 0;
       panel.hidden = validItems.length === 0;
       container.innerHTML = validItems.map(({ product, quantity, index, note, variantLabel, variantPrice, variantImage, variantId }) => {
@@ -470,12 +446,6 @@
     document.querySelector("#continue-to-payment").addEventListener("click", continueToPayment);
     document.querySelector("#back-to-login").addEventListener("click", () => setStep("login"));
     document.querySelector("#back-to-address").addEventListener("click", () => setStep("address"));
-    phoneField.addEventListener("input", () => {
-      couponEligible = false;
-      couponReason = "";
-      refresh();
-      setStatus("");
-    });
     form.addEventListener("submit", async (event) => {
       event.preventDefault();
       if (currentStep === "login") return continueToAddress();
@@ -503,19 +473,14 @@
           phone: customer.get("phone"),
           address: customer.get("address"),
           subtotal,
-          couponCode: couponEligible ? "WELCOME777" : "",
           paymentMethod: customer.get("paymentMethod"),
         });
-        couponEligible = order.couponApplied;
-        couponReason = order.reason;
-        refresh();
         const details = cart.map((item) => {
           const unitPrice = item.variantPrice ?? item.product.price;
           const name = `${item.product.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`;
           return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(unitPrice * item.quantity)}`;
         }).join("\n");
-        const discountLineText = order.couponApplied ? `\nWELCOME777 first-order discount (7%): −${currency(order.discount)}` : "";
-        const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}${discountLineText}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address: ${customer.get("address")}\n\nPlease confirm my order, shipping, and payment details.`;
+        const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address: ${customer.get("address")}\n\nPlease confirm my order, shipping, and payment details.`;
         whatsappWindow.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       } catch (error) {
         whatsappWindow.close();

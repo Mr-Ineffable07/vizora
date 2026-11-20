@@ -430,8 +430,6 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 }
 
 /* Phone-only, three-step checkout and first-order offer. */
-.coupon-discount-line strong{color:#54C98A}
-.total-line[hidden]{display:none!important}
 .checkout-stepper{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:24px 0 22px;padding:0;border-bottom:1px solid var(--line)}
 .checkout-step{position:relative;display:flex;min-width:0;flex-direction:column;align-items:center;gap:8px;padding:0 4px 16px;border:0;background:transparent;color:var(--muted);font:inherit}
 .checkout-step::after{position:absolute;right:50%;bottom:-1px;left:50%;height:2px;background:var(--rose);content:"";transition:left .2s ease,right .2s ease}

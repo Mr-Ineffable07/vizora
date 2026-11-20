@@ -19,9 +19,9 @@ VIZORA is a static storefront for personalised acrylic decor. It is built with p
 - `videos/` — homepage hero video
 - `reviews.json` — customer reviews data (starts empty)
 
-## First-order coupon checkout
+## Checkout order records
 
-Checkout collects a mobile number, address, and payment preference in three steps, then prepares the order in WhatsApp. No password or OTP is requested. `WELCOME777` eligibility is checked against completed orders through Cloudflare Pages Functions and D1. Before enabling it on the live site, follow [`CLOUDFLARE_COUPON_SETUP.md`](CLOUDFLARE_COUPON_SETUP.md) to create and bind the D1 database as `DB`. Since the phone number is not verified, customers can enter another number to claim the first-order offer again.
+Checkout collects a mobile number, address, and payment preference in three steps, then prepares the order in WhatsApp. No password, OTP, or discount code is requested. Cloudflare Pages Functions record the order reference, phone number, status, and total in D1. Follow [`CLOUDFLARE_ORDER_SETUP.md`](CLOUDFLARE_ORDER_SETUP.md) for the database setup and order status steps.
 
 ## Preview locally
 
