@@ -428,3 +428,35 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
   .home-page .hero-video{visibility:hidden}
   .home-page .hero-art.hero-video-frame{background:#08080D url("../images/hero-video-poster.jpeg") center/cover no-repeat}
 }
+
+/* Phone-only, three-step checkout and first-order offer. */
+.coupon-discount-line strong{color:#54C98A}
+.total-line[hidden]{display:none!important}
+.checkout-stepper{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));margin:24px 0 22px;padding:0;border-bottom:1px solid var(--line)}
+.checkout-step{position:relative;display:flex;min-width:0;flex-direction:column;align-items:center;gap:8px;padding:0 4px 16px;border:0;background:transparent;color:var(--muted);font:inherit}
+.checkout-step::after{position:absolute;right:50%;bottom:-1px;left:50%;height:2px;background:var(--rose);content:"";transition:left .2s ease,right .2s ease}
+.checkout-step.is-current,.checkout-step.is-complete{color:var(--ink)}
+.checkout-step.is-current::after,.checkout-step.is-complete::after{right:0;left:0}
+.checkout-step>span{display:grid;width:30px;height:30px;place-items:center;border:1px solid currentColor;border-radius:50%;font-size:13px}
+.checkout-step b{font-size:12px;font-weight:600}
+.checkout-form{display:grid;gap:12px}
+.checkout-form [hidden]{display:none!important}
+.checkout-step-pane{display:grid;gap:12px}
+.checkout-step-pane>label:not(.payment-option){margin:4px 0 -6px;font-size:13px;font-weight:600}
+.checkout-step-pane input:not([type=radio]),.checkout-step-pane textarea{width:100%;min-height:48px;padding:12px;border:1px solid var(--line);border-radius:3px;background:var(--white);color:var(--ink);font:inherit;font-size:15px}
+.checkout-step-pane textarea{resize:vertical}
+.checkout-phone-input{display:flex;align-items:center;min-height:50px;border:1px solid var(--line);border-radius:3px;background:var(--white)}
+.checkout-phone-input>span{padding:0 0 0 14px;color:var(--muted)}
+.checkout-phone-input input:not([type=radio]){min-width:0;border:0;background:transparent}
+.checkout-phone-input input:focus{outline:0}
+.checkout-step-pane .form-note{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
+.checkout-status{min-height:0}
+.checkout-status.is-error{color:#FF8796}
+.checkout-step-actions{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:8px}
+.checkout-step-actions>.button{flex:1}
+.checkout-back-button{min-height:44px;padding:0 12px;border:0;background:transparent;color:var(--ink);font:inherit;cursor:pointer}
+.payment-option{display:flex;align-items:center;gap:12px;padding:14px;border:1px solid var(--line);cursor:pointer}
+.payment-option input{accent-color:var(--accent)}
+.payment-option span{display:grid;gap:4px}
+.payment-option small{color:var(--muted);font-size:12px}
+@media(max-width:700px){.checkout-stepper{margin-top:18px}.checkout-step b{font-size:11px}.checkout-panel{padding:20px 16px}}

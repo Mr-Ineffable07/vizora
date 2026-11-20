@@ -357,40 +357,174 @@
     if (!container) return;
     const empty = document.querySelector("#cart-empty");
     const panel = document.querySelector("#checkout-panel");
+    const form = document.querySelector("#checkout-form");
+    const phoneField = form.elements.phone;
+    const nameField = form.elements.name;
+    const addressField = form.elements.address;
+    const status = document.querySelector("#checkout-message");
+    const discountLine = document.querySelector("#coupon-discount-line");
+    const discountValue = document.querySelector("#coupon-discount");
+    const subtotalValue = document.querySelector("#cart-subtotal");
+    const totalValue = document.querySelector("#cart-total");
+    const stepPanes = [...form.querySelectorAll("[data-checkout-pane]")];
+    const stepIndicators = [...document.querySelectorAll("[data-step-indicator]")];
+    let currentStep = "login";
+    let couponEligible = false;
+    let couponReason = "";
+    form.noValidate = true;
+
+    function setStatus(message, isError = false) {
+      status.textContent = message;
+      status.classList.toggle("is-error", isError);
+    }
+    async function postJson(path, data) {
+      const response = await fetch(path, {
+        method: "POST",
+        credentials: "same-origin",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(data),
+      });
+      const result = await response.json().catch(() => ({}));
+      if (!response.ok) throw new Error(result.error || "Checkout could not continue.");
+      return result;
+    }
+    function setStep(step) {
+      currentStep = step;
+      stepPanes.forEach((pane) => { pane.hidden = pane.dataset.checkoutPane !== step; });
+      const order = ["login", "address", "payment"];
+      stepIndicators.forEach((indicator) => {
+        const index = order.indexOf(indicator.dataset.stepIndicator);
+        const activeIndex = order.indexOf(step);
+        indicator.classList.toggle("is-current", index === activeIndex);
+        indicator.classList.toggle("is-complete", index < activeIndex);
+        if (index === activeIndex) indicator.setAttribute("aria-current", "step");
+        else indicator.removeAttribute("aria-current");
+      });
+    }
+    async function continueToAddress() {
+      if (!phoneField.reportValidity()) return;
+      const button = document.querySelector("#continue-to-address");
+      button.disabled = true;
+      setStatus("Checking this number for the first-order offer…");
+      try {
+        const offer = await postJson("/api/coupon/status", { phone: phoneField.value });
+        couponEligible = offer.eligible;
+        couponReason = offer.reason;
+        refresh();
+        setStatus(couponEligible
+          ? "WELCOME777 is available: 7% off your first order."
+          : couponReason === "order_pending"
+            ? "A checkout is already pending for this number."
+            : "The welcome offer is for a first completed order.");
+        setStep("address");
+        nameField.focus();
+      } catch (error) {
+        setStatus(error.message, true);
+      } finally {
+        button.disabled = false;
+      }
+    }
+    function continueToPayment() {
+      if (!nameField.reportValidity()) return;
+      if (!addressField.reportValidity()) return;
+      setStep("payment");
+      document.querySelector('[data-checkout-pane="payment"] input').focus();
+    }
     function refresh() {
       const cart = getCart();
       const validItems = cart.map((item, index) => ({ ...item, index, product: productById(item.id) })).filter((item) => item.product);
-      const total = validItems.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
-      document.querySelector("#cart-total").textContent = currency(total);
+      const subtotal = validItems.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
+      const discount = couponEligible ? Math.round(subtotal * 0.07) : 0;
+      subtotalValue.textContent = currency(subtotal);
+      discountValue.textContent = `−${currency(discount)}`;
+      discountLine.hidden = !couponEligible || subtotal === 0;
+      totalValue.textContent = currency(Math.max(0, subtotal - discount));
       empty.hidden = validItems.length > 0;
       panel.hidden = validItems.length === 0;
-      container.innerHTML = validItems.map(({ product, quantity, index, note, variantLabel, variantPrice, variantImage, variantId }) => { const unitPrice = variantPrice ?? product.price; const displayName = `${product.name}${variantLabel ? ` - ${variantLabel}` : ""}`; const detailUrl = `product.html?id=${product.id}${variantId ? `&variant=${encodeURIComponent(variantId)}` : ""}`; return `<article class="cart-item"><a class="cart-item-image" href="${detailUrl}"><img src="${variantImage || product.image}" alt="${variantImage ? `${product.name} ${variantLabel}` : product.imageAlt}"></a><div class="cart-item-copy"><p class="product-category">${product.category}</p><h2><a href="${detailUrl}">${escapeHtml(displayName)}</a></h2>${note ? `<p class="cart-custom-note">Personalisation: ${escapeHtml(note)}</p>` : ""}<p class="cart-item-price">${currency(unitPrice)}</p><button type="button" class="remove-button" data-remove="${index}">Remove</button></div><div class="quantity-control" aria-label="Quantity controls"><button type="button" data-quantity="${index}" data-change="-1" aria-label="Decrease quantity">−</button><span>${quantity}</span><button type="button" data-quantity="${index}" data-change="1" aria-label="Increase quantity">+</button></div><strong class="cart-item-total">${currency(unitPrice * quantity)}</strong></article>`; }).join("");
+      container.innerHTML = validItems.map(({ product, quantity, index, note, variantLabel, variantPrice, variantImage, variantId }) => {
+        const unitPrice = variantPrice ?? product.price;
+        const displayName = `${product.name}${variantLabel ? ` - ${variantLabel}` : ""}`;
+        const detailUrl = `product.html?id=${product.id}${variantId ? `&variant=${encodeURIComponent(variantId)}` : ""}`;
+        return `<article class="cart-item"><a class="cart-item-image" href="${detailUrl}"><img src="${variantImage || product.image}" alt="${variantImage ? `${product.name} ${variantLabel}` : product.imageAlt}"></a><div class="cart-item-copy"><p class="product-category">${product.category}</p><h2><a href="${detailUrl}">${escapeHtml(displayName)}</a></h2>${note ? `<p class="cart-custom-note">Personalisation: ${escapeHtml(note)}</p>` : ""}<p class="cart-item-price">${currency(unitPrice)}</p><button type="button" class="remove-button" data-remove="${index}">Remove</button></div><div class="quantity-control" aria-label="Quantity controls"><button type="button" data-quantity="${index}" data-change="-1" aria-label="Decrease quantity">−</button><span>${quantity}</span><button type="button" data-quantity="${index}" data-change="1" aria-label="Increase quantity">+</button></div><strong class="cart-item-total">${currency(unitPrice * quantity)}</strong></article>`;
+      }).join("");
       container.querySelectorAll("[data-quantity]").forEach((button) => button.addEventListener("click", () => {
-        const next = getCart(); const item = next[Number(button.dataset.quantity)];
+        const next = getCart();
+        const item = next[Number(button.dataset.quantity)];
         if (!item) return;
         item.quantity += Number(button.dataset.change);
         if (item.quantity < 1) next.splice(Number(button.dataset.quantity), 1);
-        saveCart(next); refresh();
+        saveCart(next);
+        refresh();
       }));
-      container.querySelectorAll("[data-remove]").forEach((button) => button.addEventListener("click", () => { const next = getCart(); next.splice(Number(button.dataset.remove), 1); saveCart(next); refresh(); }));
+      container.querySelectorAll("[data-remove]").forEach((button) => button.addEventListener("click", () => {
+        const next = getCart();
+        next.splice(Number(button.dataset.remove), 1);
+        saveCart(next);
+        refresh();
+      }));
     }
+
     refresh();
-    document.querySelector("#checkout-form").addEventListener("submit", (event) => {
+    setStep("login");
+    document.querySelector("#continue-to-address").addEventListener("click", continueToAddress);
+    document.querySelector("#continue-to-payment").addEventListener("click", continueToPayment);
+    document.querySelector("#back-to-login").addEventListener("click", () => setStep("login"));
+    document.querySelector("#back-to-address").addEventListener("click", () => setStep("address"));
+    phoneField.addEventListener("input", () => {
+      couponEligible = false;
+      couponReason = "";
+      refresh();
+      setStatus("");
+    });
+    form.addEventListener("submit", async (event) => {
       event.preventDefault();
-      const cart = getCart().map((item) => ({ ...item, product: productById(item.id) })).filter((item) => item.product);
-      if (!cart.length) return;
-      const form = new FormData(event.currentTarget);
-      const total = cart.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
-      const details = cart.map((item) => { const unitPrice = item.variantPrice ?? item.product.price; const name = `${item.product.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`; return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(unitPrice * item.quantity)}`; }).join("\n");
-      const message = `Hi VIZORA! I'd like to place an order.\n\n${details}\n\nSubtotal: ${currency(total)}\n\nName: ${form.get("name")}\nPhone: ${form.get("phone")}\nDelivery address: ${form.get("address")}\n\nPlease confirm the order, shipping, and payment details.`;
+      if (currentStep === "login") return continueToAddress();
+      if (currentStep === "address") return continueToPayment();
+      if (!phoneField.reportValidity() || !nameField.reportValidity() || !addressField.reportValidity()) return;
       if (WHATSAPP_NUMBER.includes("X")) {
-        window.alert("Before checkout can open WhatsApp, add your WhatsApp number in js/main.js (WHATSAPP_NUMBER). Your order details are ready to send.");
+        setStatus("The store WhatsApp number is not configured.", true);
         return;
       }
-      window.open(`https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`, "_blank", "noopener,noreferrer");
+      const whatsappWindow = window.open("about:blank", "_blank");
+      if (!whatsappWindow) {
+        setStatus("Allow pop-ups to continue to WhatsApp.", true);
+        return;
+      }
+      const submitButton = form.querySelector('[type="submit"]');
+      submitButton.disabled = true;
+      setStatus("Preparing your order…");
+      try {
+        const cart = getCart().map((item) => ({ ...item, product: productById(item.id) })).filter((item) => item.product);
+        if (!cart.length) throw new Error("Your bag is empty.");
+        const subtotal = cart.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
+        const customer = new FormData(form);
+        const order = await postJson("/api/orders", {
+          name: customer.get("name"),
+          phone: customer.get("phone"),
+          address: customer.get("address"),
+          subtotal,
+          couponCode: couponEligible ? "WELCOME777" : "",
+          paymentMethod: customer.get("paymentMethod"),
+        });
+        couponEligible = order.couponApplied;
+        couponReason = order.reason;
+        refresh();
+        const details = cart.map((item) => {
+          const unitPrice = item.variantPrice ?? item.product.price;
+          const name = `${item.product.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`;
+          return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(unitPrice * item.quantity)}`;
+        }).join("\n");
+        const discountLineText = order.couponApplied ? `\nWELCOME777 first-order discount (7%): −${currency(order.discount)}` : "";
+        const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}${discountLineText}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address: ${customer.get("address")}\n\nPlease confirm my order, shipping, and payment details.`;
+        whatsappWindow.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
+      } catch (error) {
+        whatsappWindow.close();
+        setStatus(error.message, true);
+      } finally {
+        submitButton.disabled = false;
+      }
     });
-  }
-  function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
+  }  function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", '"': "&quot;", "'": "&#39;" })[character]); }
   function setupNavigation() {
     const toggle = document.querySelector(".menu-toggle");
     const nav = document.querySelector(".primary-nav");
