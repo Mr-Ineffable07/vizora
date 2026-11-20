@@ -450,6 +450,7 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 .checkout-step-pane{display:grid;gap:12px}
 .checkout-step-pane>label:not(.payment-option){margin:4px 0 -6px;font-size:13px;font-weight:600}
 .checkout-step-pane input:not([type=radio]),.checkout-step-pane textarea{width:100%;min-height:48px;padding:12px;border:1px solid var(--line);border-radius:3px;background:var(--white);color:var(--ink);font:inherit;font-size:15px}
+.checkout-step-pane select{width:100%;min-height:48px;padding:12px;border:1px solid var(--line);border-radius:3px;background:var(--white);color:var(--ink);color-scheme:dark;font:inherit;font-size:15px}
 .checkout-step-pane textarea{resize:vertical}
 .checkout-phone-input{display:flex;align-items:center;min-height:50px;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:var(--white)}
 .checkout-phone-input>span{padding:0 0 0 14px;color:var(--muted)}

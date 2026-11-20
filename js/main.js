@@ -374,7 +374,13 @@
     const form = document.querySelector("#checkout-form");
     const phoneField = form.elements.phone;
     const nameField = form.elements.name;
-    const addressField = form.elements.address;
+    const addressFields = [
+      form.elements.postalCode,
+      form.elements.addressLine1,
+      form.elements.addressLine2,
+      form.elements.city,
+      form.elements.state,
+    ];
     const status = document.querySelector("#checkout-message");
     const subtotalValue = document.querySelector("#cart-subtotal");
     const totalValue = document.querySelector("#cart-total");
@@ -419,7 +425,9 @@
     }
     function continueToPayment() {
       if (!nameField.reportValidity()) return;
-      if (!addressField.reportValidity()) return;
+      for (const field of addressFields) {
+        if (!field.reportValidity()) return;
+      }
       setStep("payment");
       document.querySelector('[data-checkout-pane="payment"] input').focus();
     }
@@ -464,7 +472,17 @@
       event.preventDefault();
       if (currentStep === "login") return continueToAddress();
       if (currentStep === "address") return continueToPayment();
-      if (!phoneField.reportValidity() || !nameField.reportValidity() || !addressField.reportValidity()) return;
+      if (!phoneField.checkValidity()) {
+        setStep("login");
+        phoneField.reportValidity();
+        return;
+      }
+      const invalidAddressField = [nameField, ...addressFields].find((field) => !field.checkValidity());
+      if (invalidAddressField) {
+        setStep("address");
+        window.requestAnimationFrame(() => invalidAddressField.reportValidity());
+        return;
+      }
       if (WHATSAPP_NUMBER.includes("X")) {
         setStatus("The store WhatsApp number is not configured.", true);
         return;
@@ -482,10 +500,16 @@
         if (!cart.length) throw new Error("Your bag is empty.");
         const subtotal = cart.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
         const customer = new FormData(form);
+        const address = [
+          customer.get("addressLine1"),
+          customer.get("addressLine2"),
+          customer.get("landmark") ? `Landmark: ${customer.get("landmark")}` : "",
+          `${customer.get("city")}, ${customer.get("state")} ${customer.get("postalCode")}`,
+        ].filter(Boolean).join("\n");
         const order = await postJson("/api/orders", {
           name: customer.get("name"),
           phone: customer.get("phone"),
-          address: customer.get("address"),
+          address,
           subtotal,
           paymentMethod: customer.get("paymentMethod"),
         });
@@ -494,7 +518,7 @@
           const name = `${item.product.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`;
           return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(unitPrice * item.quantity)}`;
         }).join("\n");
-        const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address: ${customer.get("address")}\n\nPlease confirm my order, shipping, and payment details.`;
+        const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address:\n${address}\n\nPlease confirm my order, shipping, and payment details.`;
         whatsappWindow.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;
       } catch (error) {
         whatsappWindow.close();
