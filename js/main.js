@@ -15,6 +15,7 @@
   ];
   const currency = (amount) => new Intl.NumberFormat("en-IN", { style: "currency", currency: "INR", maximumFractionDigits: 0 }).format(amount);
   const products = window.VIZORA_PRODUCTS || [];
+  let scrollRevealObserver = null;
 
   function getCart() {
     try { return JSON.parse(localStorage.getItem(CART_KEY)) || []; } catch (error) { return []; }
@@ -33,6 +34,7 @@
     container.classList.toggle("is-single-item", list.length === 1);
     container.classList.toggle("is-compact-collection", list.length > 0 && list.length <= 2);
     container.innerHTML = list.map(productCard).join("");
+    observeScrollReveal(container);
     container.querySelectorAll("[data-add-to-cart]").forEach((button) => button.addEventListener("click", () => addToCart(button.dataset.addToCart, button)));
   }
   function addToCart(id, button, note = "", variant = null) {
@@ -67,17 +69,28 @@
     const icon = '<svg class="instagram-icon instagram-tile-icon" viewBox="0 0 24 24" aria-hidden="true"><rect x="3.5" y="3.5" width="17" height="17" rx="5.2"></rect><circle cx="12" cy="12" r="4"></circle><circle class="instagram-icon-dot" cx="17.7" cy="6.4" r="1"></circle></svg>';
     grid.innerHTML = INSTAGRAM_TILES.map((tile) => `<a class="instagram-tile" href="${INSTAGRAM_URL}" target="_blank" rel="noopener noreferrer" aria-label="Vizora on Instagram"><img src="${tile.image}" alt="${tile.alt}" loading="lazy">${icon}</a>`).join("");
   }
-  function setupFollowReveal() {
-    const section = document.querySelector(".follow-along-reveal");
-    if (!section || window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
-    section.classList.add("is-pending");
-    const observer = new IntersectionObserver((entries) => {
-      if (entries.some((entry) => entry.isIntersecting)) {
-        section.classList.add("is-visible");
-        observer.disconnect();
+  function observeScrollReveal(root = document) {
+    if (!scrollRevealObserver) return;
+    root.querySelectorAll("main > section:not(.hero):not(.ticker), main > .cart-layout, .detail-layout, .detail-footnote, .product-card, .value-list > article").forEach((element, index) => {
+      if (element.dataset.scrollRevealObserved) return;
+      element.dataset.scrollRevealObserved = "true";
+      if (element.matches(".product-card, .value-list > article")) {
+        element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);
       }
-    }, { threshold: 0.15 });
-    observer.observe(section);
+      element.classList.add("scroll-reveal-pending");
+      scrollRevealObserver.observe(element);
+    });
+  }
+  function setupScrollReveal() {
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches || !("IntersectionObserver" in window)) return;
+    scrollRevealObserver = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (!entry.isIntersecting) return;
+        entry.target.classList.add("is-revealed");
+        scrollRevealObserver.unobserve(entry.target);
+      });
+    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    observeScrollReveal();
   }
   async function loadHomeReviews() {
     const carousel = document.querySelector("#reviews-carousel");
@@ -533,9 +546,10 @@
     }));
   }
   document.addEventListener("DOMContentLoaded", () => {
-    setupNavigation(); setupHeroVideo(); setupYear(); updateCartCount(); setupFloatingContact(); renderHomeCategories(); renderInstagramTiles(); setupFollowReveal();
+    setupNavigation(); setupHeroVideo(); setupYear(); updateCartCount(); setupFloatingContact(); renderHomeCategories(); renderInstagramTiles();
     loadHomeReviews();
     renderCards(document.querySelector("#featured-products"), ["9", "10", "61", "12"].map(productById).filter(Boolean));
     renderShop(); renderProductDetail(); renderCart();
+    setupScrollReveal();
   });
 })();

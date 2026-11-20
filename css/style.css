@@ -358,9 +358,8 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 .instagram-follow-button{margin-inline:auto}
 .instagram-product-link{display:flex;align-items:center;gap:9px;width:fit-content;min-height:44px;margin-top:8px;color:#DDD8E6;font-size:11px;transition:color .2s ease}
 .instagram-product-link .instagram-icon{width:20px;height:20px;flex-basis:20px}
-.follow-along-reveal{opacity:1;transform:none}
-.follow-along-reveal.is-pending{opacity:0;transform:translateY(14px)}
-.follow-along-reveal.is-visible{opacity:1;transform:translateY(0);transition:opacity 400ms ease,transform 400ms ease}
+.scroll-reveal-pending{opacity:0;transform:translateY(22px);transition:opacity 650ms cubic-bezier(.2,.65,.3,1),transform 650ms cubic-bezier(.2,.65,.3,1);transition-delay:var(--reveal-delay,0ms)}
+.scroll-reveal-pending.is-revealed{opacity:1;transform:translateY(0)}
 @media(max-width:760px){
   .instagram-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
   .instagram-description{max-width:34ch}
@@ -374,7 +373,7 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
   .instagram-float{right:13px;bottom:69px;min-height:46px;padding-inline:13px}
 }
 @media(prefers-reduced-motion:reduce){
-  .follow-along-reveal,.follow-along-reveal.is-pending,.follow-along-reveal.is-visible{opacity:1;transform:none;transition:none}
+  .scroll-reveal-pending,.scroll-reveal-pending.is-revealed{opacity:1;transform:none;transition:none}
   .instagram-tile img,.instagram-tile::before,.instagram-tile-icon,.instagram-icon{transition:none}
 }
 
