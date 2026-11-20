@@ -71,8 +71,9 @@
   }
   function observeScrollReveal(root = document) {
     if (!scrollRevealObserver) return;
-    root.querySelectorAll("main > section:not(.hero):not(.ticker):not(.shop-section), main > .cart-layout, .shop-section .category-sidebar, .shop-section .shop-toolbar, .detail-layout, .detail-footnote, .product-card, .value-list > article").forEach((element, index) => {
+    root.querySelectorAll("main > section:not(.hero):not(.ticker):not(.shop-section), main > .cart-layout, .detail-layout, .detail-footnote, .product-card, .value-list > article").forEach((element, index) => {
       if (element.dataset.scrollRevealObserved) return;
+      if (element.closest(".shop-section")) return;
       element.dataset.scrollRevealObserved = "true";
       if (element.matches(".product-card, .value-list > article")) {
         element.style.setProperty("--reveal-delay", `${(index % 4) * 70}ms`);

@@ -360,6 +360,7 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 .instagram-product-link .instagram-icon{width:20px;height:20px;flex-basis:20px}
 .scroll-reveal-pending{opacity:0;transform:translateY(22px);transition:opacity 650ms cubic-bezier(.2,.65,.3,1),transform 650ms cubic-bezier(.2,.65,.3,1);transition-delay:var(--reveal-delay,0ms)}
 .scroll-reveal-pending.is-revealed{opacity:1;transform:translateY(0)}
+.shop-section .scroll-reveal-pending{opacity:1;transform:none;transition:none}
 @media(max-width:760px){
   .instagram-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
   .instagram-description{max-width:34ch}
