@@ -361,6 +361,14 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 .scroll-reveal-pending{opacity:0;transform:translateY(22px);transition:opacity 650ms cubic-bezier(.2,.65,.3,1),transform 650ms cubic-bezier(.2,.65,.3,1);transition-delay:var(--reveal-delay,0ms)}
 .scroll-reveal-pending.is-revealed{opacity:1;transform:translateY(0)}
 .shop-section .scroll-reveal-pending{opacity:1;transform:none;transition:none}
+
+/* Keep the Best Seller cards aligned as a clean row. */
+.featured-grid{align-items:stretch}
+.featured-grid .product-card{display:flex;height:100%;flex-direction:column}
+.featured-grid .product-image-wrap{flex:0 0 auto;aspect-ratio:4/4.65}
+.featured-grid .product-card-info{flex:1 0 auto}
+.featured-grid .add-button{margin-top:auto}
+@media(max-width:640px){.featured-grid .product-image-wrap{aspect-ratio:1/1.15}}
 @media(max-width:760px){
   .instagram-grid{grid-template-columns:repeat(2,minmax(0,1fr));gap:11px}
   .instagram-description{max-width:34ch}
