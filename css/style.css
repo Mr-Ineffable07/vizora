@@ -451,9 +451,11 @@ em{ text-shadow:0 0 14px rgba(200,16,46,.24) }
 .checkout-step-pane>label:not(.payment-option){margin:4px 0 -6px;font-size:13px;font-weight:600}
 .checkout-step-pane input:not([type=radio]),.checkout-step-pane textarea{width:100%;min-height:48px;padding:12px;border:1px solid var(--line);border-radius:3px;background:var(--white);color:var(--ink);font:inherit;font-size:15px}
 .checkout-step-pane textarea{resize:vertical}
-.checkout-phone-input{display:flex;align-items:center;min-height:50px;border:1px solid var(--line);border-radius:3px;background:var(--white)}
+.checkout-phone-input{display:flex;align-items:center;min-height:50px;overflow:hidden;border:1px solid var(--line);border-radius:3px;background:var(--white)}
 .checkout-phone-input>span{padding:0 0 0 14px;color:var(--muted)}
-.checkout-phone-input input:not([type=radio]){min-width:0;border:0;background:transparent}
+.checkout-phone-input input:not([type=radio]){min-width:0;border:0;background:transparent;color:var(--ink);color-scheme:dark}
+.checkout-phone-input input:-webkit-autofill,.checkout-phone-input input:-webkit-autofill:hover,.checkout-phone-input input:-webkit-autofill:focus{ -webkit-text-fill-color:var(--ink);-webkit-box-shadow:0 0 0 1000px var(--white) inset;caret-color:var(--ink);transition:background-color 9999s ease-out 0s}
+.checkout-phone-input input:-moz-autofill{box-shadow:0 0 0 1000px var(--white) inset;color:var(--ink)}
 .checkout-phone-input input:focus{outline:0}
 .checkout-step-pane .form-note{margin:0;color:var(--muted);font-size:12px;line-height:1.5}
 .checkout-status{min-height:0}
