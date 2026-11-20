@@ -8,6 +8,20 @@ In Cloudflare, open **Workers & Pages → your VIZORA Pages project → Settings
 
 The Functions are in the repository's root `/functions` directory. `_routes.json` scopes them to `/api/*`.
 
+## Price verification
+
+The order API calculates prices from the server catalog in `lib/product-catalog.js`; it ignores totals sent by the browser. When product prices or variants change in `js/products.js`, run `node scripts/sync-product-catalog.js` and commit the updated server catalog too.
+
+For an existing database, run `migrations/0003_store_verified_order_items.sql` once to save the server-verified item breakdown with each order. Until then, the checkout still records the server-calculated total, but not its item breakdown. To verify a WhatsApp draft against the saved order, run:
+
+```sql
+SELECT id, phone_e164, status, subtotal_rupees, total_rupees, items_json
+FROM orders
+WHERE id = 'VZ-ORDER-REFERENCE';
+```
+
+Use the saved order record as the price source if a customer edits the prefilled WhatsApp message.
+
 ## Create the table on a new database
 
 For a new D1 database, run `migrations/0001_orders.sql` in its SQL console.

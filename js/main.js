@@ -498,7 +498,6 @@
       try {
         const cart = getCart().map((item) => ({ ...item, product: productById(item.id) })).filter((item) => item.product);
         if (!cart.length) throw new Error("Your bag is empty.");
-        const subtotal = cart.reduce((sum, item) => sum + (item.variantPrice ?? item.product.price) * item.quantity, 0);
         const customer = new FormData(form);
         const address = [
           customer.get("addressLine1"),
@@ -510,13 +509,12 @@
           name: customer.get("name"),
           phone: customer.get("phone"),
           address,
-          subtotal,
+          items: cart.map((item) => ({ id: item.id, quantity: item.quantity, variantId: item.variantId || null, note: item.note || "" })),
           paymentMethod: customer.get("paymentMethod"),
         });
-        const details = cart.map((item) => {
-          const unitPrice = item.variantPrice ?? item.product.price;
-          const name = `${item.product.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`;
-          return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(unitPrice * item.quantity)}`;
+        const details = order.items.map((item) => {
+          const name = `${item.name}${item.variantLabel ? ` - ${item.variantLabel}` : ""}`;
+          return `• ${name} × ${item.quantity}${item.note ? ` (Personalisation: ${item.note})` : ""} — ${currency(item.lineTotal)}`;
         }).join("\n");
         const message = `Hi VIZORA! I'd like to place an order.\n\nOrder reference: ${order.orderId}\n${details}\n\nSubtotal: ${currency(order.subtotal)}\nTotal before shipping: ${currency(order.total)}\nPayment preference: ${customer.get("paymentMethod")}\n\nName: ${customer.get("name")}\nPhone: ${order.phone}\nDelivery address:\n${address}\n\nPlease confirm my order, shipping, and payment details.`;
         whatsappWindow.location.href = `https://wa.me/${WHATSAPP_NUMBER}?text=${encodeURIComponent(message)}`;

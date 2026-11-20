@@ -4,6 +4,7 @@ CREATE TABLE IF NOT EXISTS orders (
   status TEXT NOT NULL DEFAULT 'pending' CHECK (status IN ('pending', 'completed', 'cancelled')),
   subtotal_rupees INTEGER NOT NULL,
   total_rupees INTEGER NOT NULL,
+  items_json TEXT NOT NULL DEFAULT '[]',
   created_at INTEGER NOT NULL
 );
 
