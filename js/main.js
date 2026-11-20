@@ -71,7 +71,7 @@
   }
   function observeScrollReveal(root = document) {
     if (!scrollRevealObserver) return;
-    root.querySelectorAll("main > section:not(.hero):not(.ticker), main > .cart-layout, .detail-layout, .detail-footnote, .product-card, .value-list > article").forEach((element, index) => {
+    root.querySelectorAll("main > section:not(.hero):not(.ticker):not(.shop-section), main > .cart-layout, .shop-section .category-sidebar, .shop-section .shop-toolbar, .detail-layout, .detail-footnote, .product-card, .value-list > article").forEach((element, index) => {
       if (element.dataset.scrollRevealObserved) return;
       element.dataset.scrollRevealObserved = "true";
       if (element.matches(".product-card, .value-list > article")) {
@@ -89,7 +89,7 @@
         entry.target.classList.add("is-revealed");
         scrollRevealObserver.unobserve(entry.target);
       });
-    }, { threshold: 0.12, rootMargin: "0px 0px -8% 0px" });
+    }, { threshold: 0.05, rootMargin: "0px" });
     observeScrollReveal();
   }
   async function loadHomeReviews() {
