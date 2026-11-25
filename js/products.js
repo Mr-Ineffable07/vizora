@@ -133,3 +133,23 @@ window.VIZORA_PRODUCTS = [
   { id: "131", name: "Batman Gotham Comics Phone Skin", category: "Phone Skins", categoryId: "phone-skins", price: 499, compareAt: null, badge: "PHONE SKIN", image: "images/phone-skin-37.jpeg", imageAlt: "Batman collage in black, white, and red with Gotham newspaper artwork", short: "A Gotham-inspired design with red accents.", description: "A printed phone skin featuring Batman against layered Gotham newspaper and comic artwork." },
   { id: "132", name: "Hooded Spider-Man Noir Phone Skin", category: "Phone Skins", categoryId: "phone-skins", price: 499, compareAt: null, badge: "PHONE SKIN", image: "images/phone-skin-38.jpeg", imageAlt: "Hooded black and white Spider-Man portrait over a dark comic collage", short: "A shadowy monochrome hero portrait.", description: "A printed phone skin featuring a hooded Spider-Man-inspired character over dark comics." },
 ];
+
+// Poster print sizes share one price list across the collection.
+const posterSizePrices = [
+  { id: "a4", label: "A4", price: 399 },
+  { id: "a3", label: "A3", price: 749 },
+  { id: "a2", label: "A2", price: 1149 }
+];
+window.VIZORA_PRODUCTS.filter((product) => product.categoryId === "posters").forEach((product) => {
+  const frameVariant = (product.variants || []).find((variant) => variant.id === "3-panel-frame");
+  product.price = posterSizePrices[0].price;
+  product.variants = [
+    ...posterSizePrices.map((size) => ({
+      ...size,
+      image: product.image,
+      imageAlt: product.imageAlt,
+      thumbnail: false
+    })),
+    ...(frameVariant ? [frameVariant] : [])
+  ];
+});
