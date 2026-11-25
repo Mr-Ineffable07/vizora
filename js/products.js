@@ -150,6 +150,6 @@ window.VIZORA_PRODUCTS.filter((product) => product.categoryId === "posters").for
       imageAlt: product.imageAlt,
       thumbnail: false
     })),
-    ...(frameVariant ? [frameVariant] : [])
+    ...(frameVariant ? [{ ...frameVariant, thumbnail: false }] : [])
   ];
 });
